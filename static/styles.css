@@ -1,0 +1,21 @@
+:root {
+    --orange: #f7a935;
+    --purple: #855cd6;
+    --white: #fcfcfc;
+}
+
+@font-face {
+    font-family: "roboto";
+    src: url('/fonts/Roboto/Roboto-VariableFont_wdth,wght.ttf') format("truetype");
+}
+
+@font-face {
+    font-family: "arcade";
+    src: url('/fonts/Press_Start_2P/PressStart2P-Regular.ttf') format("truetype");
+}
+
+body {
+    background: var(--white);
+    font-family: "roboto";
+    text-align: center;
+}

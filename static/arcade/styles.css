@@ -1,0 +1,56 @@
+html {
+    scrollbar-width: none;
+}
+
+html::-webkit-scrollbar {
+    display: none; 
+}
+
+body {
+    background: var(--white);
+    font-family: "roboto";
+    padding-top: 7rem;
+}
+
+.game-icon {
+    padding: 10px;
+    border: 10px solid var(--orange);
+    box-sizing: border-box;
+}
+
+.game-img {
+    width: 100%;
+    aspect-ratio: 1.33;
+
+    border: 2px solid black;
+}
+
+#container {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+    gap: 20px;
+}
+
+#top-bar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    background: var(--white);
+    z-index: 100;
+    margin-bottom: 0;
+}
+
+#title {
+    font-size: 6rem;
+    text-align: center;
+    color: var(--orange);
+    font-family: "arcade";
+    margin: 0.5rem;
+}
+
+#instructions {
+    font-family: "arcade";
+    font-size: 2rem;
+    text-align: center;
+}

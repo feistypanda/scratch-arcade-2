@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    
+    <link rel="stylesheet" type="text/css" href="../styles.css">
+    <link rel="stylesheet" type="text/css" href="./styles.css">
+
+    <title>Upload - Scratch Arcade</title>
+</head>
+<body>
+
+
+    <p id="sub-title">Put your scratch maze game on the</p>
+    <h1 id="title">Scratch Arcade!</h1>
+
+    <h2>SELECT YOUR GAME FOLDER:<h2>
+
+    <form id="upload-form" action="/upload" method="POST" enctype="multipart/form-data">
+        <input type="file" name="files" webkitdirectory multiple onchange="document.getElementById('folderName').value = this.files[0].webkitRelativePath.split('/')[0];document.getElementById('fileCount').value = validFiles.length;" />
+        <input type="hidden" id="folderName" name="folderName" />
+        <input type="hidden" id="fileCount" name="fileCount" />
+        <button type="submit">Upload Files</button>
+    </form>
+
+    <h2 id="instructions-title">Instructions:</h2>
+</body>
+
+</html>
