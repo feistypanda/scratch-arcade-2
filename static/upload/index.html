@@ -16,11 +16,11 @@
 
     <h2>SELECT YOUR GAME FOLDER:<h2>
 
-    <form id="upload-form" action="/upload" method="POST" enctype="multipart/form-data">
-        <input type="file" name="files" webkitdirectory multiple onchange="document.getElementById('folderName').value = this.files[0].webkitRelativePath.split('/')[0];document.getElementById('fileCount').value = validFiles.length;" />
-        <input type="hidden" id="folderName" name="folderName" />
-        <input type="hidden" id="fileCount" name="fileCount" />
-        <button type="submit">Upload Files</button>
+    <form action="/upload" method="post" enctype="multipart/form-data">
+        <input type="file" name="html"/>
+        <input type="file" name="png"/>
+        <input type="file" name="sb3"/>
+        <button type="submit">submit</button>
     </form>
 
     <h2 id="instructions-title">Instructions:</h2>
