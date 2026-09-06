@@ -17,6 +17,6 @@ app.get('/', (req, res) => {
 	return res.redirect('/upload');
 });
 
-app.post('/upload', upload.fields(uploadFields), uploadFiles);
+app.post('/api/upload', upload.fields(uploadFields), uploadFiles);
 
 app.listen(PORT, '0.0.0.0', () => console.log(`Server running on http://localhost:${PORT}`));

@@ -16,7 +16,7 @@ const addFilesToDir = (() => {
 
 	return function (files, dirname) {
 
-		let fileNames = '';
+		let fileNames = [];
 
 		const errors = [];
 		const promises = [];
@@ -25,24 +25,12 @@ const addFilesToDir = (() => {
 
 			const { file, expected } = i;
 
-			const extName = path.extname(file.originalname);
-			if (('.' + expected) !== extName) {
-				errors.push(`expected file extension .${expected} and got ${file.originalname} with extension ${extName}`);
-				continue;
-			}
-
-			fileNames += file.originalname + ' ';
-
-			const promise = fs.rename(file.path, path.join(dirname, extMap[expected])).catch(e => console.log(e));
+			const promise = fs.rename(file.path, path.join(dirname, extMap[expected])).then(_ => fileNames.push(file.originalname));
 
 			promises.push(promise);
 		}
 
-		Promise.all(promises).then(_ => {
-			deleteFiles(files);
-		})
-
-		return Promise.resolve(fileNames);
+		return Promise.all(promises).then(_ => { return { success: true, fileNames }});
 	}
 })();
 
@@ -50,14 +38,21 @@ function checkFiles (files) {
 
 	const errors = [];
 
+	let found = [];
+	for (const i of files) found.push(i.expected);
+
+	if (!found.includes('html')) errors.push('found no html file - make sure you include the html file you got from the packager')
+	if (!found.includes('png')) errors.push('found no png file - make sure you take a screenshot of your game to be the thumbnail')
+	if (!found.includes('png')) errors.push('found no sb3 file - make sure you include the sb3 file you got from scratch')
+
 	for (const i of files) {
 		const { file, expected } = i;
 
 		const extName = path.extname(file.originalname);
 		if (('.' + expected) !== extName) errors.push(`expected a file with file extension '.${expected}' and got file '${file.originalname}' with extension '${extName}'`);
 	}
-
-	if (errors.length > 0) return {error: errors.join('\n')};
+	
+	if (errors.length > 0) return { errors };
 	else return {success: true};
 }
 
@@ -78,29 +73,54 @@ function deleteFiles (files) {
 	for (const i of files) fs.unlink(i.file.path).catch(e => console.log(e));
 }
 
+function checkName (name) {
+
+	if (!name || (typeof name) !== 'string') return { errors: ['game name is required'] };
+	if (name.match(/^[_-]|[^\w-]|[_-](?=[_-])|[_-]$/g)) return { errors: [`invalid game name: ${name}`] };
+
+	return { success: true };
+}
+
+function doError (res, files, errors) {
+	deleteFiles(files);
+	res.send({ errors });
+}
+
+function updateGameData (dir) {
+	const gamesData = {};
+
+	fs.readdir(dir, { withFileTypes: true }).then(entries => {
+		const folderNames = entries.filter(dirent => dirent.isDirectory()).map(dirent => dirent.name);
+		console.log(folderNames);
+	})
+}
+
 module.exports = function (req, res) {
 
-	const gameName = path.join(DROP_DIR, 'testing') + Math.round(Math.random() * 1000);
-
 	const files = getFiles(req);
-	const checked = checkFiles(files);
+	const checkedFiles = checkFiles(files);
 
-	if (checked.success) {
+	const name = req.body.name;
+	const checkedName = checkName(name);
 
-		fs.mkdir(gameName).then(_ => {
-			addFilesToDir(files, gameName).then(msg => res.send(msg));		
-		}).catch(e => {
-			console.log(e)
+	let errors = [];
+	if (checkedName.errors) errors = errors.concat(checkedName.errors);
+	if (checkedFiles.errors) errors = errors.concat(checkedFiles.errors);
 
-			if (e.code === 'EEXIST') {
-				return res.send(`game name ${gameName} has already been taken`);
-			} else {
-				return res.send(e);
-			}
-		})
+	if (errors.length > 0) return doError(res, files, errors);
+	
+	const gameName = path.join(DROP_DIR, name);
 
-	} else {
-		deleteFiles(files);
-		return res.send(checked.error);	
-	}
+	fs.mkdir(gameName).then(_ => {
+		return addFilesToDir(files, gameName);
+	}).then(msg => {
+		updateGameData(DROP_DIR);
+		res.send(msg);
+	}).catch(e => {
+		if (e.code === 'EEXIST') return doError(res, files, [`game name '${name}' has already been taken`]);
+		else {
+			console.log(e);
+			return doError(res, files, [e]);
+		}
+	})
 }

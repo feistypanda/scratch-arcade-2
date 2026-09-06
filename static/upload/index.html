@@ -16,14 +16,41 @@
 
     <h2>SELECT YOUR GAME FOLDER:<h2>
 
-    <form action="/upload" method="post" enctype="multipart/form-data">
-        <input type="file" name="html"/>
-        <input type="file" name="png"/>
-        <input type="file" name="sb3"/>
-        <button type="submit">submit</button>
-    </form>
+    <div>
+        <input type="text" id="name" placeholder="game name" autocomplete="off" autofocus/>
+        <input type="file" id="html"/>
+        <input type="file" id="png"/>
+        <input type="file" id="sb3"/>
+        <button id="submit">submit</button>
+    </div>
 
     <h2 id="instructions-title">Instructions:</h2>
+
+    <script>
+        function submitFiles () {
+            const formData = new FormData();
+
+            const name = document.querySelector('#name');
+
+            const files = {
+                html: document.querySelector('#html'),
+                png: document.querySelector('#png'),
+                sb3: document.querySelector('#sb3'),
+            }
+
+            formData.append('name', name.value);
+            for (const i in files) formData.append(i, files[i].files[0])
+
+            const options = {
+                method: 'POST',
+                body: formData,
+            }
+
+            fetch('/api/upload', options).then(response => response.json()).then(dat => console.log(dat));
+        }
+
+        document.querySelector('#submit').addEventListener('click', submitFiles);
+    </script>
 </body>
 
 </html>
