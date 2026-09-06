@@ -76,7 +76,8 @@ function deleteFiles (files) {
 function checkName (name) {
 
 	if (!name || (typeof name) !== 'string') return { errors: ['game name is required'] };
-	if (name.match(/^[_-]|[^\w-]|[_-](?=[_-])|[_-]$/g)) return { errors: [`invalid game name: ${name}`] };
+	if (name.match(/^[' ]|[^\w ']| (?= )|'(?=')|[' ]$/g)) return { errors: [`invalid game name: ${name}`] };
+	if (name.length < 3 || name.length > 15) return { errors: ['game name must be between 3 and 15 characters in length'] };
 
 	return { success: true };
 }
@@ -87,12 +88,29 @@ function doError (res, files, errors) {
 }
 
 function updateGameData (dir) {
-	const gamesData = {};
+	const gamesData = [];
 
-	fs.readdir(dir, { withFileTypes: true }).then(entries => {
+	return fs.readdir(dir, { withFileTypes: true }).then(entries => {
 		const folderNames = entries.filter(dirent => dirent.isDirectory()).map(dirent => dirent.name);
-		console.log(folderNames);
+		
+		for (const i of folderNames) {
+			gamesData.push({
+				title: unEscapeName(i),
+				link: path.join('/games', i),
+				img: path.join('/games', i, 'img.png'),
+			})
+		}
+
+		return fs.writeFile(path.join(dir, 'games.json'), JSON.stringify(gamesData), 'utf-8');
 	})
+}
+
+function escapeName (name) {
+	return name.replaceAll('\'', '_').replaceAll(' ', '-');
+}
+
+function unEscapeName (name) {
+	return name.replaceAll('_', '\'').replaceAll('-', ' ');
 }
 
 module.exports = function (req, res) {
@@ -109,7 +127,7 @@ module.exports = function (req, res) {
 
 	if (errors.length > 0) return doError(res, files, errors);
 	
-	const gameName = path.join(DROP_DIR, name);
+	const gameName = path.join(DROP_DIR, escapeName(name));
 
 	fs.mkdir(gameName).then(_ => {
 		return addFilesToDir(files, gameName);
