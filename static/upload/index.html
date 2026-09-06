@@ -2,6 +2,10 @@
 <html>
 <head>
     <meta charset="utf-8">
+
+    <!-- http://getbootstrap.com/docs/5.3/ -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-sRIl4kxILFvY47J16cr9ZwB07vP4J8+LH7qKQnuqkuIAvNWLzeN8tE5YBujZqJLB" crossorigin="anonymous">
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js" integrity="sha384-FKyoEForCGlyvwx9Hj09JcYn3nv7wiPVlz7YYwJrWVcXK/BmnVDxM+D2scQbITxI" crossorigin="anonymous"></script>
     
     <link rel="stylesheet" type="text/css" href="../styles.css">
     <link rel="stylesheet" type="text/css" href="./styles.css">
@@ -14,17 +18,69 @@
     <p id="sub-title">Put your scratch maze game on the</p>
     <h1 id="title">Scratch Arcade!</h1>
 
-    <h2>SELECT YOUR GAME FOLDER:<h2>
+    <div id='container'>
+        
+        <div id='instructions-container'>
+            <h2>Instructions:</h2>
+        </div>
 
-    <div>
-        <input type="text" id="name" placeholder="game name" autocomplete="off" autofocus/>
-        <input type="file" id="html"/>
-        <input type="file" id="png"/>
-        <input type="file" id="sb3"/>
-        <button id="submit">submit</button>
+        <div id='upload-container'>
+
+            <h2>Upload your game:</h2>
+            <p id='errors'></p>
+            <div id='buttons'>
+            <input type="text" id="name" placeholder="game name" autocomplete="off" autofocus class='buttons'/>
+            <button id="submit" class='buttons'>Upload</button>
+            </div>
+            <label for="html" class="drop-container">
+                <span class="drop-title">Drop HTML file here</span>
+                or
+                <input type="file" id="html" accept=".html" required>
+            </label>
+            <label for="png" class="drop-container">
+                <span class="drop-title">Drop PNG file here</span>
+                or
+                <input type="file" id="png" accept=".png" required>
+            </label>
+            <label for="sb3" class="drop-container">
+                <span class="drop-title">Drop SB3 file here</span>
+                or
+                <input type="file" id="sb3" accept=".sb3" required>
+            </label>
+        </div>
+
     </div>
 
-    <h2 id="instructions-title">Instructions:</h2>
+    <script>
+        
+        for (const i of document.querySelectorAll('.drop-container')) {
+            const dropContainer = i;
+            const fileInput = document.getElementById(i.getAttribute("for"));
+
+            dropContainer.addEventListener("dragover", (e) => {
+                // prevent default to allow drop
+                e.preventDefault()
+            }, false)
+
+            dropContainer.addEventListener("dragenter", () => {
+                dropContainer.classList.add("drag-active")
+            })
+
+            dropContainer.addEventListener("dragleave", () => {
+                dropContainer.classList.remove("drag-active")
+            })
+
+            dropContainer.addEventListener("drop", (e) => {
+                e.preventDefault()
+                dropContainer.classList.remove("drag-active")
+
+                const extName = e.dataTransfer.files[0].name.split('.').pop();
+                if (('.' + extName) === fileInput.getAttribute('accept')) fileInput.files = e.dataTransfer.files;
+                
+            })
+        }
+        
+    </script>
 
     <script>
         function submitFiles () {
@@ -46,7 +102,14 @@
                 body: formData,
             }
 
-            fetch('/api/upload', options).then(response => response.json()).then(dat => console.log(dat));
+            fetch('/api/upload', options).then(response => response.json()).then(dat => {
+                const display = document.querySelector('#errors');
+                if (dat.errors) {
+                    display.innerHTML = '<h3>Failure</h3>' + '- ' + dat.errors.join('<br>- ');
+                } else {
+                    display.innerHTML = '<h3>Success!</h3> <a href="/arcade">click here to preview arcade</a>';
+                }
+            });
         }
 
         document.querySelector('#submit').addEventListener('click', submitFiles);

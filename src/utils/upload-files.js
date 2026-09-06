@@ -43,7 +43,7 @@ function checkFiles (files) {
 
 	if (!found.includes('html')) errors.push('found no html file - make sure you include the html file you got from the packager')
 	if (!found.includes('png')) errors.push('found no png file - make sure you take a screenshot of your game to be the thumbnail')
-	if (!found.includes('png')) errors.push('found no sb3 file - make sure you include the sb3 file you got from scratch')
+	if (!found.includes('sb3')) errors.push('found no sb3 file - make sure you include the sb3 file you got from scratch')
 
 	for (const i of files) {
 		const { file, expected } = i;
