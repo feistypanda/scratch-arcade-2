@@ -4,7 +4,7 @@ const path = require('path');
 const fs = require('fs');
 
 const upload = require('./utils/multer');
-const uploadFiles = require('./utils/upload-files');
+const { uploadFiles, getFiles } = require('./utils/upload-files');
 const { uploadFields } = require('./config/config');
 
 const PORT = 8000;
@@ -21,6 +21,8 @@ app.get('/index.html', (req, res) => {
 	return res.redirect('/arcade');
 });
 
-app.post('/api/upload', upload.fields(uploadFields), uploadFiles);
+app.post('/api/upload', upload.fields(uploadFields), (req, res) => {
+	uploadFiles(req.body.name, getFiles(req)).then(result => res.send(result));
+});
 
 app.listen(PORT, '0.0.0.0', () => console.log(`Server running on http://localhost:${PORT}`));

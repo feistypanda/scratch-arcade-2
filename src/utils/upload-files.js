@@ -25,12 +25,15 @@ const addFilesToDir = (() => {
 
 			const { file, expected } = i;
 
-			const promise = fs.rename(file.path, path.join(dirname, extMap[expected])).then(_ => fileNames.push(file.originalname));
+			const destination = path.join(dirname, extMap[expected])
+			const promise = fs.rename(file.path, destination).then(_ => fileNames.push(file.originalname));
+
+			if (expected === 'html') promise.then(_ => insertScript(destination))
 
 			promises.push(promise);
 		}
 
-		return Promise.all(promises).then(_ => { return { success: true, fileNames }});
+		return Promise.all(promises).then(_ => { return { success: true, fileNames }}).catch(e => console.log(e));
 	}
 })();
 
@@ -77,14 +80,14 @@ function checkName (name) {
 
 	if (!name || (typeof name) !== 'string') return { errors: ['game name is required'] };
 	if (name.match(/^[' ]|[^\w ']| (?= )|'(?=')|[' ]$/g)) return { errors: [`invalid game name: ${name}`] };
-	if (name.length < 3 || name.length > 15) return { errors: ['game name must be between 3 and 15 characters in length'] };
+	if (name.length < 3 || name.length > 25) return { errors: ['game name must be between 3 and 25 characters in length'] };
 
 	return { success: true };
 }
 
-function doError (res, files, errors) {
+function doError (files, errors) {
 	deleteFiles(files);
-	res.send({ errors });
+	return Promise.resolve({ errors });
 }
 
 function updateGameData (dir) {
@@ -101,7 +104,7 @@ function updateGameData (dir) {
 			})
 		}
 
-		return fs.writeFile(path.join(dir, 'games.json'), JSON.stringify(gamesData), 'utf-8');
+		return fs.writeFile(path.join(dir, 'games.json'), JSON.stringify(gamesData), 'utf8');
 	})
 }
 
@@ -113,32 +116,35 @@ function unEscapeName (name) {
 	return name.replaceAll('_', '\'').replaceAll('-', ' ');
 }
 
-module.exports = function (req, res) {
+function uploadFiles (name, files) {
 
-	const files = getFiles(req);
 	const checkedFiles = checkFiles(files);
-
-	const name = req.body.name;
 	const checkedName = checkName(name);
 
 	let errors = [];
 	if (checkedName.errors) errors = errors.concat(checkedName.errors);
 	if (checkedFiles.errors) errors = errors.concat(checkedFiles.errors);
 
-	if (errors.length > 0) return doError(res, files, errors);
+	if (errors.length > 0) return doError(files, errors);
 	
 	const gameName = path.join(DROP_DIR, escapeName(name));
 
-	fs.mkdir(gameName).then(_ => {
+	return fs.mkdir(gameName).then(_ => {
 		return addFilesToDir(files, gameName);
 	}).then(msg => {
 		updateGameData(DROP_DIR);
-		res.send(msg);
+		return { msg };
 	}).catch(e => {
-		if (e.code === 'EEXIST') return doError(res, files, [`game name '${name}' has already been taken`]);
+		if (e.code === 'EEXIST') return doError(files, [`game name '${name}' has already been taken`]);
 		else {
 			console.log(e);
-			return doError(res, files, [e]);
+			return doError(files, [e]);
 		}
 	})
 }
+
+function insertScript (file) {
+	return fs.readFile(file, 'utf8').then(data => fs.writeFile(file, data.replace('<head>', '<head><script>document.addEventListener(\'keydown\',function(e){if(e.code===\'KeyQ\'){window.open(\'/arcade\', \'_self\');}});</script>')))
+}
+
+module.exports = { uploadFiles, getFiles };

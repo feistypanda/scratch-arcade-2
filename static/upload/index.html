@@ -107,6 +107,7 @@
                 if (dat.errors) {
                     display.innerHTML = '<h3>Failure</h3>' + '- ' + dat.errors.join('<br>- ');
                 } else {
+                    for (const i of document.querySelectorAll('input')) i.value = null;
                     display.innerHTML = '<h3>Success!</h3> <a href="/arcade">click here to preview arcade</a>';
                 }
             });
