@@ -22,6 +22,30 @@
         
         <div id='instructions-container'>
             <h2>Instructions:</h2>
+            <div id="instructions-items-container">
+                <h3>Prepare your game:</h3>
+                <ol>
+                    <li>Make a copy of your game so that you can make it compatible with the arcade</li>
+                    <li><b>Make sure that the copy of your game uses the correct key binds:</b> R is up, D is left, F is down, G is right. S is start, A is action1 (eg shoot), W is action2 (eg speed boost). DO NOT USE Q!!</li>
+                </ol>
+                <h3>Package your game:</h3>
+                <ol>
+                    <li>In the scratch editor, go to file and click save to computer. This should give you your SB3 file.</li>
+                    <li>Go to <a href="https://packager.turbowarp.org/">https://packager.turbowarp.org/</a>. Turbowarp is blocked on the school wifi and chrome browser, so you will need a VPN and personal browser. Do not try to use a different packager, <b>it will not work</b></li>
+                    <li>In turbowarp, go to the select project section and choose the SB3 file you downloaded from scratch <img src="/img-1.png" alt="image for step 3"></li>
+                    <li>After you select the SB3 file, click load project and scroll down to the 'Player Options' section. <b>Make sure that the 'Start project automatically' is selected:</b> <img src="/img-2.png" alt="img for step 4"></b></li>
+                    <li>Finally, scroll all the way to the bottom and click package. This will give you your HTML file.</li>
+                </ol>
+                <h3>Upload your game:</h3>
+                <ol>
+                    <li>Uploading your game takes place on the other half of this website</li>
+                    <li><b>Input the name of your game</b> in the text box. Make sure that the name uses only letters, numbers, spaces, and single quotes. No double spaces. </li>
+                    <li><b>Input your HTML file</b></li>
+                    <li>Take a screenshot of your game and make sure it is a png file. Then <b>input that png file</b>. This will be the thumbnail for your game</li>
+                    <li><b>Upload your SB3 file</b></li>
+                    <li>Click the upload button. If you followed all the steps correctly, it should say 'Success!'</li>
+                </ol>
+            </div>
         </div>
 
         <div id='upload-container'>
@@ -104,6 +128,7 @@
 
             fetch('/api/upload', options).then(response => response.json()).then(dat => {
                 const display = document.querySelector('#errors');
+                display.style.display = 'block';
                 if (dat.errors) {
                     display.innerHTML = '<h3>Failure</h3>' + '- ' + dat.errors.join('<br>- ');
                 } else {

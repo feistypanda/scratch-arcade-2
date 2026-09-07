@@ -21,6 +21,24 @@ h2 {
     margin: 0.5rem;
 }
 
+ol {
+    font-size: 1.2rem;
+}
+
+li {
+    margin: 0.5rem;
+}
+
+img {
+    width: 300px;
+    hieght: auto;
+}
+
+#instructions-items-container {
+    margin-top: 3rem;
+    margin-left: 2rem;
+}
+
 #container {
     display: flex;
     flex-direction: row;
@@ -39,6 +57,7 @@ h2 {
 
 #instructions-container {
     width: 30vw;
+    text-align: left;
 }
 
 #buttons {
@@ -54,6 +73,7 @@ h2 {
 
 #errors {
     text-align: left;
+    display: none;
 }
 
 .drop-container {
