@@ -49,7 +49,7 @@ body {
     margin: 0.5rem;
 }
 
-#instructions {
+.instructions {
     font-family: "arcade";
     font-size: 2rem;
     text-align: center;

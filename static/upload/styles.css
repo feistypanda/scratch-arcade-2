@@ -43,9 +43,9 @@ img {
     display: flex;
     flex-direction: row;
     padding: 3rem;
-    padding-left: 13.33vw;
+    padding-left: 8.33vw;
     padding-right: 13.33vw;
-    gap: 13.33vw;
+    gap: 10.33vw;
 }
 
 #upload-container {
@@ -56,7 +56,7 @@ img {
 }
 
 #instructions-container {
-    width: 30vw;
+    width: 38vw;
     text-align: left;
 }
 

@@ -15,10 +15,11 @@
     <div id="top-bar">
         <h1 id="title">Scratch Arcade</h1>
     </div>
-    <p id="instructions">Use the joystick to navigate through the games, and press the start button to play!</p>
+    <p class="instructions">Use the joystick to navigate through the games, and press the start button to play!</p>
 
     <div id="container"></div>
 
+    <p class="instructions" id="ip"></p>
     <script>
 
 const main = (() => {
@@ -131,6 +132,13 @@ fetch('/games/games.json')
     .then(main)
     .catch(err => console.error("Run the Python script first to generate games.json!", err));
 
+// get the ip adress
+fetch('/api/ip')
+    .then(response => response.json())
+    .then(dat => {
+        console.log(dat);
+        document.querySelector('#ip').innerHTML = `Upload at ${dat.ip}:8000/`;
+    });
     </script>
 </body>
 </html>

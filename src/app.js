@@ -6,6 +6,7 @@ const fs = require('fs');
 const upload = require('./utils/multer');
 const { uploadFiles, getFiles } = require('./utils/upload-files');
 const { uploadFields } = require('./config/config');
+const ipAdress = require('./config/ip')
 
 const PORT = 8000;
 const app = express();
@@ -20,6 +21,10 @@ app.get('/', (req, res) => {
 app.get('/index.html', (req, res) => {
 	return res.redirect('/arcade');
 });
+
+app.get('/api/ip', (req, res) => {
+	res.json({ ip: ipAdress["en0"][0] });
+})
 
 app.post('/api/upload', upload.fields(uploadFields), (req, res) => {
 	uploadFiles(req.body.name, getFiles(req)).then(result => res.send(result));
