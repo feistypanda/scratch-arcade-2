@@ -4,7 +4,7 @@ const path = require('path');
 const fs = require('fs');
 
 const upload = require('./utils/multer');
-const { uploadFiles, getFiles } = require('./utils/upload-files');
+const { uploadFiles, uploadLink, getFiles } = require('./upload-controller/upload-files');
 const { uploadFields } = require('./config/config');
 const ipAdress = require('./config/ip')
 
@@ -31,8 +31,12 @@ app.get('/api/ip', (req, res) => {
 	res.json({ ip });
 })
 
-app.post('/api/upload', upload.fields(uploadFields), (req, res) => {
+app.post('/api/upload-files', upload.fields(uploadFields), (req, res) => {
 	uploadFiles(req.body.name, getFiles(req)).then(result => res.send(result));
 });
+
+app.post('/api/upload-link', upload.single('png'), (req, res) => {
+	uploadLink(req.body.name, req.body.link, req.file).then(result => res.send(result));
+})
 
 app.listen(PORT, '0.0.0.0', () => console.log(`Server running on http://localhost:${PORT}`));
