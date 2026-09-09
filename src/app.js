@@ -23,7 +23,12 @@ app.get('/index.html', (req, res) => {
 });
 
 app.get('/api/ip', (req, res) => {
-	res.json({ ip: ipAdress["en0"][0] });
+
+	let ip = '[failure to find IP adress]';
+	if (ipAdress["en0"]) ip = ipAdress["en0"][0];
+	if (ipAdress["wlan0"]) ip = ipAdress["wlan0"][0];
+
+	res.json({ ip });
 })
 
 app.post('/api/upload', upload.fields(uploadFields), (req, res) => {
