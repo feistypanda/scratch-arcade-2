@@ -23,12 +23,10 @@ function getFiles (req) {
 	return files;
 }
 
-function deleteFiles (files) {
-	if (files instanceof Array) {
-		for (const i of files) fs.unlink(i.file.path).catch(e => console.log(e));
-	} else if (files) {
-		fs.unlink(files.path).catch(e => console.log(e));
-	}
+function clearDir (dir) {
+	return fs.rm(dir, { recursive: true, force: true })
+		.then(_ => fs.mkdir(dir))
+		.catch(e => console.log(e));
 }
 
 function updateGameData (dir) {
@@ -53,4 +51,4 @@ function insertScript (file) {
 	return fs.readFile(file, 'utf8').then(data => fs.writeFile(file, data.replace('<head>', '<head><script>document.addEventListener(\'keydown\',function(e){if(e.code===\'KeyQ\'){window.open(\'/arcade\', \'_self\');}});</script>')))
 }
 
-module.exports = { getFiles, deleteFiles, updateGameData, insertScript };
+module.exports = { getFiles, clearDir, updateGameData, insertScript };

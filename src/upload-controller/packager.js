@@ -4,32 +4,41 @@ const path = require('path');
 
 const Packager = require('@turbowarp/packager');
 
-module.exports = async function getPackaged (link) {
-	try {
+function getToken (id) {
+	return fetch(`https://api.scratch.mit.edu/projects/${id}`)
+		.then(response => response.json())
+		.then(data => data.project_token);
+}
 
-		const url = new URL(link);
-		const id = url.pathname.split('/')[2];
+function checkToken (token) {
+	if (!token) return Promise.reject({ code: 'INVALIDSCRATCHID' });
+	else return Promise.resolve(token);
+}
 
-		// get project token from scratch api
-		const response = await fetch(`https://api.scratch.mit.edu/projects/${id}`);
-		const data = await response.json();
-		const token = data.project_token;
+function getProjectData (id, token) {
+	return fetch(`https://projects.scratch.mit.edu/${id}?token=${token}`)
+		.then(response => response.arrayBuffer())
+}
 
-		const projectData = await (await fetch(`https://projects.scratch.mit.edu/${id}?token=${token}`)).arrayBuffer();
+function packageProject (loadedProject, title) {
+	const packager = new Packager.Packager();
+	packager.project = loadedProject;
 
-		const loadedProject = await Packager.loadProject(projectData);
+	packager.options.autoplay = true;
+	packager.options.app.windowTitle = title;
 
-		const packager = new Packager.Packager();
-		packager.project = loadedProject;
+	return packager.package();
+}
 
-		packager.options.autoplay = true;
+module.exports = function getPackaged (link, name) {
 
-		const result = await packager.package();
+	const url = new URL(link);
+	const id = url.pathname.split('/')[2];
 
-		return result.data;
-
-	} catch (e) {
-		console.log(e);
-		return { errors: 'error packaging project. Try again.'}
-	}
+	return getToken(id)
+		.then(token => checkToken(token))
+		.then(token => getProjectData(id, token))
+		.then(projectData => Packager.loadProject(projectData))
+		.then(loadedProject => packageProject(loadedProject, name))
+		.then(result => result.data);
 }

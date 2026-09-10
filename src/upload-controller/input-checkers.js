@@ -45,12 +45,18 @@ function checkLink (link) {
 
 	if (!link || (typeof link) !== 'string') return { errors: ["link is required"] };
 
-	const url = new URL(link);
+	let url;
+
+	try {
+		url = new URL(link);
+	} catch (e) {
+		return { errors: [`Invalid url '${link}'`] };
+	}
 
 	const errors = [];
 
 	const pathName = url.pathname.split('/');
-	if (url.hostname !== 'scratch.mit.edu') errors.push(`expected 'scratch.mit.edu' link and found ${url.hostname}`);
+	if (url.hostname !== 'scratch.mit.edu') errors.push(`link must be from 'scratch.mit.edu' and link '${url}' is not`);
 	else if (pathName[1] !== 'projects' || !pathName[2].match(/^[0-9]+$/)) errors.push(`scratch link ${url.toString()} is not a link to a project`);
 
 	if (errors.length > 0) return { errors };
