@@ -19,90 +19,129 @@
     <h1 id="title">Scratch Arcade!</h1>
 
     <div id='container'>
-        
-        <div id='instructions-container'>
-            <h2>Instructions:</h2>
-            <div id="instructions-items-container">
+        <h2>Upload your game!</h2>
+        <div id="step1" class="step">
+            <div class="form-floating mb-3 input">
+                <input type="text" class="form-control" id="link" placeholder="https://scratch.mit.edu/example" autocomplete="off">
+                <label for="link">Link to scratch game</label>
+                <button id="continue" class="disabled">Continue</button>
             </div>
-        </div>
-
-        <div id='upload-container'>
-
-            <h2>Upload your game:</h2>
+            
             <p id='errors'></p>
-            <input type="text" id="name" placeholder="Game name" autocomplete="off" autofocus/>
-            <input type="text" id="link" placeholder="Game link" autocomplete="off"/>
-            <label for="png" class="drop-container">
-                <span class="drop-title">Drop PNG file here</span>
-                or
-                <input type="file" id="png" accept=".png" required>
-            </label>
-            <button id="submit">Upload</button>
         </div>
 
+        <div id="instructions-container">
+            <div>
+                <h2>Instructions:</h2>
+                <div class="list">
+                    <p>Make sure you use the keybinds in the table on the right.</p>
+                    <p>Make sure you have shared your game</p>
+                    <p>Make sure that your game does not require the mouse</p>
+                </div>
+            </div>
+            <table class="table table-striped">
+                <thead>
+                    <tr>
+                    <th scope="col">ACTION</th>
+                    <th scope="col">KEY</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>MOVE UP</td>
+                        <td>R</td>
+                    </tr>
+                    <tr>
+                        <td>MOVE LEFT</td>
+                        <td>D</td>
+                    </tr>
+                    <tr>
+                        <td>MOVE DOWN</td>
+                        <td>F</td>
+                    </tr>
+                    <tr>
+                        <td>MOVE RIGHT</td>
+                        <td>G</td>
+                    </tr>
+                    <tr>
+                        <td>RESTART GAME</td>
+                        <td>S</td>
+                    </tr>
+                    <tr>
+                        <td>ACTION 1</td>
+                        <td>A</td>
+                    </tr>
+                    <tr>
+                        <td>ACTION 2</td>
+                        <td>W</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
     </div>
 
     <script>
-        
-        for (const i of document.querySelectorAll('.drop-container')) {
-            const dropContainer = i;
-            const fileInput = document.getElementById(i.getAttribute("for"));
 
-            dropContainer.addEventListener("dragover", (e) => {
-                // prevent default to allow drop
-                e.preventDefault()
-            }, false)
+        const link = document.querySelector('#link');
+        const errors = document.querySelector('#errors');
+        const btn = document.querySelector('#continue');
+        const invalidLinks = [];
 
-            dropContainer.addEventListener("dragenter", () => {
-                dropContainer.classList.add("drag-active")
-            })
-
-            dropContainer.addEventListener("dragleave", () => {
-                dropContainer.classList.remove("drag-active")
-            })
-
-            dropContainer.addEventListener("drop", (e) => {
-                e.preventDefault()
-                dropContainer.classList.remove("drag-active")
-
-                const extName = e.dataTransfer.files[0].name.split('.').pop();
-                if (('.' + extName) === fileInput.getAttribute('accept')) fileInput.files = e.dataTransfer.files;
-                
-            })
+        function err (msg) {
+            btn.classList.add('disabled')
+            errors.innerHTML = msg;
         }
-        
-    </script>
 
-    <script>
-        function submitFiles () {
-            const formData = new FormData();
+        window.setInterval(function () {
+            let value = link.value;
 
-            const name = document.querySelector('#name');
-            const link = document.querySelector('#link');
-            const png = document.querySelector('#png');
+            if (!value) return err('Enter your link');
 
-            formData.append('name', name.value);
-            formData.append('link', link.value);
-            formData.append('png', png.files[0]);
+            if (invalidLinks.includes(value)) return err('Invalid link - make sure you shared your project');
 
-            const options = {
-                method: 'POST',
-                body: formData,
+            let url;
+
+            try {
+                url = new URL(value);
+            } catch (e) {
+                return err('Invalid URL');
             }
 
-            fetch('/api/upload-link', options).then(response => response.json()).then(dat => {
-                const display = document.querySelector('#errors');
-                display.style.display = 'block';
-                if (dat.errors) {
-                    display.innerHTML = '<h3>Failure</h3>' + '- ' + dat.errors.join('<br>- ');
-                } else {
-                    for (const i of document.querySelectorAll('input')) i.value = null;
-                    display.innerHTML = '<h3>Success!</h3> <a href="/arcade">click here to preview arcade</a>';
-                }
-            });
-        }
+            if (url.hostname !== 'scratch.mit.edu') return err('URL must be from \'scratch.mit.edu\'');
 
-        document.querySelector('#submit').addEventListener('click', submitFiles);
+            const pathName = url.pathname.split('/');
+            if (pathName[1] !== 'projects' || !pathName[2].match(/^[0-9]+$/)) return err(`Scratch link '${url.toString()}' is not a link to a project`);
+
+            btn.classList.remove('disabled');
+
+            errors.innerHTML = '';
+
+        }, 50);
+
+        btn.addEventListener('click', function () {
+            if (btn.classList.contains('disabled')) return;
+
+            btn.classList.add('disabled');
+
+            const url = new URL(link.value);
+            const id = url.pathname.split('/')[2];
+            
+            return fetch(`/api/get-game-data/${id}`)
+                .then(response => response.json())
+                .then(data => {
+                    if (data.code) return invalidLinks.push(link.value);
+
+                    const redirectUrl = new URL(window.location + 'preview');
+                    const params = redirectUrl.searchParams;
+
+                    params.append('link', url.toString());
+                    params.append('title', data.title);
+                    params.append('thumbnail', data.image);
+
+                    window.location.replace(redirectUrl.toString());
+                })
+
+        })
     </script>
 </body>
 

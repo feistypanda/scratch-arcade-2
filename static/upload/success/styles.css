@@ -1,0 +1,17 @@
+
+#message {
+	font-size: 4rem !important;
+}
+
+#container {
+	margin: auto;
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+}
+
+#button-container {
+	display: flex;
+	flex-direction: row;
+	gap: 2rem;
+}

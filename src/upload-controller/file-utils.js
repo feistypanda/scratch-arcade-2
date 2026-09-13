@@ -10,19 +10,6 @@ function unEscapeName (name) {
 	return name.replaceAll('_', '\'').replaceAll('-', ' ');
 }
 
-function getFiles (req) {
-	let files = [];
-	for (const i of uploadFields) {
-		if (req.files[i.name]) {
-			files.push({
-				expected: i.name,
-				file: req.files[i.name][0],
-			});
-		}
-	}
-	return files;
-}
-
 function clearDir (dir) {
 	return fs.rm(dir, { recursive: true, force: true })
 		.then(_ => fs.mkdir(dir))
@@ -51,4 +38,4 @@ function insertScript (file) {
 	return fs.readFile(file, 'utf8').then(data => fs.writeFile(file, data.replace('<head>', '<head><script>document.addEventListener(\'keydown\',function(e){if(e.code===\'KeyQ\'){window.open(\'/arcade\', \'_self\');}});</script>')))
 }
 
-module.exports = { getFiles, clearDir, updateGameData, insertScript };
+module.exports = { clearDir, updateGameData, insertScript };

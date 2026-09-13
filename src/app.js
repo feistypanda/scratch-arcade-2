@@ -3,9 +3,8 @@ const express = require('express');
 const path = require('path');
 const fs = require('fs');
 
-const upload = require('./utils/multer');
-const { uploadFiles, uploadLink, getFiles } = require('./upload-controller/upload-files');
-const { uploadFields } = require('./config/config');
+const multerUpload = require('./utils/multer');
+const upload = require('./upload-controller/upload');
 const ipAdress = require('./config/ip')
 
 const PORT = 8000;
@@ -31,12 +30,14 @@ app.get('/api/ip', (req, res) => {
 	res.json({ ip });
 })
 
-app.post('/api/upload-files', upload.fields(uploadFields), (req, res) => {
-	uploadFiles(req.body.name, getFiles(req)).then(result => res.send(result));
-});
+app.post('/api/upload', multerUpload.single('img'), (req, res) => {
+	upload(req.body.name, req.body.link, (req.file ? req.file : req.body.img)).then(result => res.send(result));
+})
 
-app.post('/api/upload-link', upload.single('png'), (req, res) => {
-	uploadLink(req.body.name, req.body.link, req.file).then(result => res.send(result));
+app.get('/api/get-game-data/:id', (req, res) => {
+	if (!req.params.id || typeof req.params.id !== 'string') return res.send({ code:'invalid id' });
+	
+	fetch(`https://api.scratch.mit.edu/projects/${req.params.id}`).then(response => response.json()).then(dat => res.send(dat));
 })
 
 app.listen(PORT, '0.0.0.0', () => console.log(`Server running on http://localhost:${PORT}`));
