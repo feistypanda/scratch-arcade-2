@@ -7,48 +7,54 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-sRIl4kxILFvY47J16cr9ZwB07vP4J8+LH7qKQnuqkuIAvNWLzeN8tE5YBujZqJLB" crossorigin="anonymous">
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js" integrity="sha384-FKyoEForCGlyvwx9Hj09JcYn3nv7wiPVlz7YYwJrWVcXK/BmnVDxM+D2scQbITxI" crossorigin="anonymous"></script>
     
-    <link rel="stylesheet" type="text/css" href="../styles.css">
     <link rel="stylesheet" type="text/css" href="../../styles.css">
+    <link rel="stylesheet" type="text/css" href="../shared.css">
     <link rel="stylesheet" type="text/css" href="./styles.css">
 
     <title>Upload - Scratch Arcade</title>
 </head>
 <body>
-    <p id="sub-title">Put your scratch game on the</p>
-    <h1 id="title">Scratch Arcade!</h1>
+    
+    <h1> Scratch Arcade </h1>
 
-    <div id='container'>
-        <h2>Upload your game!</h2>
+    <main>
 
-        <div id="step2" class="step">         
-            <div id="step2-container">
-                <div id="step2-inputs">
-                    <p>Edit game title:</p>
-                    <div id="title-input-container">
-                        <div class="form-floating mb-3 input">
-                            <input type="text" class="form-control" id="name" placeholder="Game name" autocomplete="off">
-                            <label for="name">Game Title</label>
-                        </div>
-                        <p id="invalid-feedback"></p>
-                    </div>
-                    <p>Edit thumbnail:</p>
-                    <div class="mb-3 input" id="thumbnail-input">
-                        <input type="file" id="thumbnail" placeholder="Game name" autocomplete="off" accept="image/*">
-                    </div>
-                    <button id="upload-btn" class="disabled">Upload!</button>
-                    
-                    <p id='errors'></p>
+        <div id="inputs-container" class="container">
+            <div class="section-header-container">
+                <h2 class="section-header"> Edit Info: </h2>
+            </div>
+
+            <div id="inputs-inner-container">
+              
+                <div class="form-floating mb-3 input">
+                    <input type="text" class="form-control" id="name" placeholder="Game name" autocomplete="off">
+                    <label for="name">Game Title</label>
+                    <div class="input-label errors" id="invalid-feedback"></div>
                 </div>
-
-                <div id="step2-preview">
-                    <div id="preview">
-                        <h3 id="preview-title"></h3>
-                        <img id="preview-img">
-                    </div>
+                
+                <div class="mb-3 input" id="thumbnail-input">
+                    <div id="thumbnail-label" class="input-label">Upload thumbnail:</div>
+                    <input type="file" id="thumbnail" placeholder="Game name" autocomplete="off" accept="image/*">
                 </div>
+                
+                <button id="upload-btn" class="button disabled">Upload!</button>  
+
+                <p class="errors" id="errors"></p>
             </div>
         </div>
-    </div>
+        <div id="preview-container" class="container">
+
+            <div class="section-header-container">
+                <h2 class="section-header"> Preview: </h2>
+            </div>
+
+            <div id="preview">
+                <h3 id="preview-title"></h3>
+                <img id="preview-img">
+            </div>
+        </div>
+
+    </main>
 
     <script>
 
@@ -79,8 +85,7 @@
             invalidFeedback.innerHTML = msg;
         }
 
-        window.setInterval(function () {
-
+        function runOnChange () {
             const name = title.value;
 
             if (!name || (typeof name) !== 'string') return err('Input your game name');
@@ -92,7 +97,6 @@
             if (name.length < 3) return err('Game name is too short');
             if (name.length > 18) return err('Game name is too long');
 
-
             btn.classList.remove('disabled');
 
             invalidFeedback.style.display = 'none';
@@ -100,8 +104,14 @@
 
             gameDat.name = name;
             previewTitle.innerHTML = name;
+        }
 
-        }, 50);
+        runOnChange();
+
+        title.addEventListener("change", runOnChange);
+        title.addEventListener("paste", runOnChange);
+        title.addEventListener("keyup", runOnChange);
+        title.addEventListener("keydown", runOnChange);
 
         thumbnail.addEventListener('change', () => {
             const file = thumbnail.files[0];
@@ -139,13 +149,16 @@
                     errors.style.display = 'block';
                     errors.innerHTML = '<br><h3>Upload failure</h3>' + '- ' + dat.errors.join('<br>- ');
                 } else {
-                    window.location.replace('/upload/success')
+                    window.location.href = '/upload/success';
                 }
             });
         }
 
         btn.addEventListener('click', function() {
-            if (!btn.classList.contains('disabled')) submitFiles();
+            if (!btn.classList.contains('disabled')) {
+                btn.classList.add('disabled')
+                submitFiles();
+            }
         });
     </script>
 </body>

@@ -7,38 +7,39 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-sRIl4kxILFvY47J16cr9ZwB07vP4J8+LH7qKQnuqkuIAvNWLzeN8tE5YBujZqJLB" crossorigin="anonymous">
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js" integrity="sha384-FKyoEForCGlyvwx9Hj09JcYn3nv7wiPVlz7YYwJrWVcXK/BmnVDxM+D2scQbITxI" crossorigin="anonymous"></script>
     
-    <link rel="stylesheet" type="text/css" href="../styles.css">
+    <link rel="stylesheet" type="text/css" href="../../styles.css">
+    <link rel="stylesheet" type="text/css" href="../shared.css">
     <link rel="stylesheet" type="text/css" href="./styles.css">
-
+    
     <title>Upload - Scratch Arcade</title>
 </head>
 <body>
 
+    <h1> Scratch Arcade </h1>
 
-    <p id="sub-title">Put your scratch game on the</p>
-    <h1 id="title">Scratch Arcade!</h1>
+    <main>
+        <div id="inputs-container" class="container">
+            <div class="section-header-container">
+                <h2 class="section-header"> Upload your game: </h2>
+            </div>
 
-    <div id='container'>
-        <h2>Upload your game!</h2>
-        <div id="step1" class="step">
-            <div class="form-floating mb-3 input">
+            <div id="inputs-inner-container" class="form-floating mb-3 input">
                 <input type="text" class="form-control" id="link" placeholder="https://scratch.mit.edu/example" autocomplete="off">
                 <label for="link">Link to scratch game</label>
-                <button id="continue" class="disabled">Continue</button>
+                <button id="continue" class="button disabled">Continue</button>
             </div>
-            
-            <p id='errors'></p>
+
+            <p id="errors" class="errors"></p>
         </div>
 
-        <div id="instructions-container">
-            <div>
-                <h2>Instructions:</h2>
-                <div class="list">
-                    <p>Make sure you use the keybinds in the table on the right.</p>
-                    <p>Make sure you have shared your game</p>
-                    <p>Make sure that your game does not require the mouse</p>
-                </div>
+        <div id="instructions-container" class="container">
+
+            <div class="section-header-container">
+                <h2 class="section-header"> Arcade Keybinds: </h2>
+
+                <p><b> Make sure that your game uses these controls! </b></p>
             </div>
+            
             <table class="table table-striped">
                 <thead>
                     <tr>
@@ -68,17 +69,17 @@
                         <td>S</td>
                     </tr>
                     <tr>
-                        <td>ACTION 1</td>
+                        <td>ACTION 1 (eg shoot)</td>
                         <td>A</td>
                     </tr>
                     <tr>
-                        <td>ACTION 2</td>
+                        <td>ACTION 2 (eg speed boost)</td>
                         <td>W</td>
                     </tr>
                 </tbody>
             </table>
         </div>
-    </div>
+    </main>
 
     <script>
 
@@ -92,7 +93,7 @@
             errors.innerHTML = msg;
         }
 
-        window.setInterval(function () {
+        function runOnChange () {
             let value = link.value;
 
             if (!value) return err('Enter your link');
@@ -116,7 +117,12 @@
 
             errors.innerHTML = '';
 
-        }, 50);
+        }
+
+        link.addEventListener("change", runOnChange);
+        link.addEventListener("paste", runOnChange);
+        link.addEventListener("keyup", runOnChange);
+        link.addEventListener("keydown", runOnChange);
 
         btn.addEventListener('click', function () {
             if (btn.classList.contains('disabled')) return;
@@ -129,16 +135,19 @@
             return fetch(`/api/get-game-data/${id}`)
                 .then(response => response.json())
                 .then(data => {
-                    if (data.code) return invalidLinks.push(link.value);
+                    if (data.code) {
+                        invalidLinks.push(link.value);
+                        return runOnChange();
+                    }
 
-                    const redirectUrl = new URL(window.location + 'preview');
+                    const redirectUrl = new URL(window.location + '../preview');
                     const params = redirectUrl.searchParams;
 
                     params.append('link', url.toString());
                     params.append('title', data.title);
                     params.append('thumbnail', data.image);
 
-                    window.location.replace(redirectUrl.toString());
+                    window.location.href = redirectUrl.toString();
                 })
 
         })

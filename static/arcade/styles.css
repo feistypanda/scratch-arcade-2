@@ -14,6 +14,7 @@ body {
 
 .game-icon {
     padding: 10px;
+    padding-top: 0px;
     border: 10px solid var(--orange);
     box-sizing: border-box;
 }

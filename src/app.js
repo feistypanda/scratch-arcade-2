@@ -3,7 +3,9 @@ const express = require('express');
 const path = require('path');
 const fs = require('fs');
 
+const config = require('./config/config')
 const multerUpload = require('./utils/multer');
+const fileUtil = require('./utils/file-utils');
 const upload = require('./upload-controller/upload');
 const ipAdress = require('./config/ip')
 
@@ -14,7 +16,11 @@ app.use(express.json());
 app.use(express.static(path.join(__dirname, '../static')))
 
 app.get('/', (req, res) => {
-	return res.redirect('/upload');
+	return res.redirect('/upload/start');
+});
+
+app.get('/upload', (req, res) => {
+	return res.redirect('/upload/start');
 });
 
 app.get('/index.html', (req, res) => {
@@ -38,6 +44,11 @@ app.get('/api/get-game-data/:id', (req, res) => {
 	if (!req.params.id || typeof req.params.id !== 'string') return res.send({ code:'invalid id' });
 	
 	fetch(`https://api.scratch.mit.edu/projects/${req.params.id}`).then(response => response.json()).then(dat => res.send(dat));
+})
+
+app.get('/api/update-game-data', (req, res) => {
+	fileUtil.updateGameData(config.dropDir);
+	return res.redirect('/');
 })
 
 app.listen(PORT, '0.0.0.0', () => console.log(`Server running on http://localhost:${PORT}`));
