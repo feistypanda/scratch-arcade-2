@@ -21,16 +21,31 @@ function updateGameData (dir) {
 
 	return fs.readdir(dir, { withFileTypes: true }).then(entries => {
 		const folderNames = entries.filter(dirent => dirent.isDirectory()).map(dirent => dirent.name);
+
+		const promises = [];
 		
 		for (const i of folderNames) {
-			gamesData.push({
-				title: unEscapeName(i),
-				link: path.join('/games', i),
-				img: path.join('/games', i, 'img.png'),
-			})
+			promises.push(fs.readdir(path.join(dir, i)).then(entries => {
+				for (const j of entries) {
+					if (j.split('.')[0] === 'img') {
+						gamesData.push({
+							title: unEscapeName(i),
+							link: path.join('/games', i),
+							img: path.join('/games', i, j),
+						});
+						return Promise.resolve();
+					}
+				}
+
+				gamesData.push({
+					title: unEscapeName(i),
+					link: path.join('/games', i),
+					img: path.join('/games', i, 'img.png'),
+				})
+			}));
 		}
 
-		return fs.writeFile(path.join(dir, 'games.json'), JSON.stringify(gamesData), 'utf8');
+		return Promise.all(promises).then(_ => fs.writeFile(path.join(dir, 'games.json'), JSON.stringify(gamesData), 'utf8'));
 	})
 }
 

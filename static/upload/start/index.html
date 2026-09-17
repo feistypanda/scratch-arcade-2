@@ -37,7 +37,7 @@
             <div class="section-header-container">
                 <h2 class="section-header"> Arcade Keybinds: </h2>
 
-                <p><b> Make sure that your game uses these controls! </b></p>
+                <p><b> Make sure that your game uses these controls!</b><br> (You may want to make a copy of your game) </p>
             </div>
             
             <table class="table table-striped">
@@ -86,7 +86,6 @@
         const link = document.querySelector('#link');
         const errors = document.querySelector('#errors');
         const btn = document.querySelector('#continue');
-        const invalidLinks = [];
 
         function err (msg) {
             btn.classList.add('disabled')
@@ -97,8 +96,6 @@
             let value = link.value;
 
             if (!value) return err('Enter your link');
-
-            if (invalidLinks.includes(value)) return err('Invalid link - make sure you shared your project');
 
             let url;
 
@@ -136,15 +133,15 @@
                 .then(response => response.json())
                 .then(data => {
                     if (data.code) {
-                        invalidLinks.push(link.value);
-                        return runOnChange();
+                        err('Invalid link - Make sure you shared your scratch project so it can be accessed');
+                        return btn.classList.remove('disabled');
                     }
 
                     const redirectUrl = new URL(window.location + '../preview');
                     const params = redirectUrl.searchParams;
 
                     params.append('link', url.toString());
-                    params.append('title', data.title);
+                    params.append('title', data.title.replaceAll(/^[' ]|[^\w ']| (?= )|'(?=')|[' ]$/g, '').substr(0, 18));
                     params.append('thumbnail', data.image);
 
                     window.location.href = redirectUrl.toString();

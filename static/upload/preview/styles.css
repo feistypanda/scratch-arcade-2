@@ -74,5 +74,5 @@ input[type=file]::file-selector-button:hover {
 
 #preview-img {
     width: 500px;
-    height: auto;
+    aspect-ratio: 1.33;
 }
